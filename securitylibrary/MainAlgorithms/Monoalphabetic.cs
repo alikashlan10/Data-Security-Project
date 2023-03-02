@@ -10,17 +10,54 @@ namespace SecurityLibrary
     {
         public string Analyse(string plainText, string cipherText)
         {
-            throw new NotImplementedException();
+            cipherText = cipherText.ToLower();
+            plainText = plainText.ToLower();
+            List<char> dist = new List<char>();
+            for(int i = 0; i < 26; i++)
+            {
+                dist.Add((char)('a'+i));
+            }
+            char[] chars = new char[26];
+            string key = "";
+            for (int i = 0; i < cipherText.Length; i++) {
+                int key_indx = (int)(plainText[i] - 'a');
+                chars[key_indx] = cipherText[i];
+                if(dist.Contains(cipherText[i]))
+                    dist.Remove(cipherText[i]);
+            }
+            int j = 0;
+            for (int i = 0; i < chars.Length; i++) {
+                if (chars[i] != '\0')
+                    key += chars[i];
+                else
+                {
+                    key += dist[j];
+                    j++;
+                }
+            }
+            return key;
         }
 
         public string Decrypt(string cipherText, string key)
         {
-            throw new NotImplementedException();
+            cipherText = cipherText.ToLower();
+            key = key.ToLower();
+            Dictionary<char, int> key_char_indx = new Dictionary<char, int>();
+            for (int i = 0; i < key.Length; i++)
+                key_char_indx[key[i]] = i;
+            String plainText = "";
+            for (int i = 0; i < cipherText.Length; i++)
+                plainText += (char)('a' + key_char_indx[cipherText[i]]);
+            return plainText;
         }
 
         public string Encrypt(string plainText, string key)
         {
-            throw new NotImplementedException();
+            plainText = plainText.ToLower();
+            String cipherText = "";
+            for (int i = 0; i < plainText.Length; i++)
+                cipherText += key[plainText[i]-'a'];
+            return cipherText;
         }
 
         /// <summary>
