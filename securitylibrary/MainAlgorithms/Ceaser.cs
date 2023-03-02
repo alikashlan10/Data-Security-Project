@@ -8,32 +8,24 @@ namespace SecurityLibrary
 {
     public class Ceaser : ICryptographicTechnique<string, int>
     {
-        int mod(int x, int m)
-        {
-            return (x % m + m) % m;
-        }
+        int mod(int x, int m){ return (x % m + m) % m; }
 
         public string Encrypt(string plainText, int key)
         {
-
-            String ct = "";
-            char temp;
-
-
+            plainText = plainText.ToLower();
+            String cipherText = "";
             for (int i = 0; i < plainText.Length; i++)
             {
-                temp = (char)mod(plainText[i] + key - 'a', 26);
-                temp += 'a';
-                ct += temp;
+                char equivalentLetter = (char)mod(plainText[i] - 'a' + key, 26);
+                equivalentLetter += 'a';
+                cipherText += equivalentLetter;
 
             }
-
-            return ct;
+            return cipherText;
         }
 
         public string Decrypt(string cipherText, int key)
         {
-            cipherText = cipherText.ToLower();
             return Encrypt(cipherText, key * -1);
         }
 
@@ -41,7 +33,7 @@ namespace SecurityLibrary
         {
             plainText = plainText.ToLower();
             cipherText = cipherText.ToLower();
-            int key = (int)mod(cipherText[0] - plainText[0], 26);
+            int key = mod(cipherText[0] - plainText[0], 26);
             return key;
         }
     }
