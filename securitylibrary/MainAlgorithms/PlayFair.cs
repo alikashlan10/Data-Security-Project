@@ -6,8 +6,24 @@ using System.Threading.Tasks;
 
 namespace SecurityLibrary
 {
-    public class PlayFair : ICryptographic_Technique<string, string>
+    public class PlayFair : ICryptographicTechnique<string, string>
     {
+        /// <summary>
+        /// The most common diagrams in english (sorted): TH, HE, AN, IN, ER, ON, RE, ED, ND, HA, AT, EN, ES, OF, NT, EA, TI, TO, IO, LE, IS, OU, AR, AS, DE, RT, VE
+        /// </summary>
+        /// <param name="plainText"></param>
+        /// <param name="cipherText"></param>
+        /// <returns></returns>
+        public string Analyse(string plainText)
+        {
+            throw new NotImplementedException();
+        }
+
+        public string Analyse(string plainText, string cipherText)
+        {
+            throw new NotSupportedException();
+        }
+
         public string Decrypt(string cipherText, string key)
         {
             key = key.ToLower();
@@ -40,6 +56,8 @@ namespace SecurityLibrary
                     cntr++;
                 }
             }
+
+
 
             /////////////////////////////////
 
@@ -95,17 +113,18 @@ namespace SecurityLibrary
             plainText = plainText.Substring(0, plainText.Length - extra);
 
 
-            for (int i = 0; i < plainText.Length; i++)
+            string PlainX = plainText;
+            int shift = 0;
+            for (int i = 1; i < plainText.Length - 1; i++)
             {
-                if (plainText[i] == 'x' && plainText[i - 1] == plainText[i + 1])
+                if (PlainX[i] == 'x' && PlainX[i - 1] == PlainX[i + 1] && (i % 2 != 0))
                 {
-                    plainText = plainText.Remove(i, 1);
+                    plainText = plainText.Remove(i - shift, 1);
+                    shift++;
                 }
             }
             return plainText;
-
         }
-
         public string Encrypt(string plainText, string key)
         {
             plainText = plainText.ToLower();
