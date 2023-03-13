@@ -33,7 +33,28 @@ namespace SecurityLibrary
 
         public List<int> Encrypt(List<int> plainText, List<int> key)
         {
-            throw new NotImplementedException();
+            int m = (int)Math.Sqrt(key.Count);
+            int n = plainText.Count / m;
+            List<int> cipherText = new List<int>(new int[plainText.Count]);
+
+            for (int i = 0; i < m; i++)
+            {
+                for (int j = 0; j < m; j++)
+                {
+                    //k[i,j] = k[i*m+j]
+                    for(int k = 0; k < n; k++)
+                    {
+                        //c[i,k] += k[i,j]*p[j,k]
+                        cipherText[i*n + k] += key[i*m + j] * plainText[j*n + k];
+                    }
+                }
+            }
+
+            for (int i = 0; i < cipherText.Count; i++) 
+                cipherText[i] %= 26;
+
+
+            return cipherText;
         }
 
         public string Encrypt(string plainText, string key)
