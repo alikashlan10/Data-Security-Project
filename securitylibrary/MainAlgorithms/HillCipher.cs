@@ -106,7 +106,22 @@ namespace SecurityLibrary
         }
         public List<int> Analyse(List<int> plainText, List<int> cipherText)
         {
-            throw new NotImplementedException();
+            int[,] plainText2d = convert1DListTo2DArr(plainText, 2, plainText.Count/2);
+            int[,] cipherText2d = convert1DListTo2DArr(plainText, 2, cipherText.Count/2);
+            int[,] plainText2x2 = new int[2, 2];
+            int[,] cipherText2x2 = new int[2, 2];
+            for(int i = 0; i < 2; i++)
+            {
+                for(int j = 0; j < 2; j++)
+                {
+                    plainText2x2[i, j] = plainText2d[i, j+2];
+                    cipherText2x2[i, j] = cipherText2d[i, j+2];
+                }
+            }
+            plainText2x2 = invert2x2Matrix(plainText2x2);
+            int[,] key = multiply2Matrices(cipherText2x2, plainText2x2, 2, 2);
+
+            return plainText;
         }
 
         public string Analyse(string plainText, string cipherText)
