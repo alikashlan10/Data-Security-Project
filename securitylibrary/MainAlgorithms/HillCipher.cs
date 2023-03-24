@@ -110,16 +110,7 @@ namespace SecurityLibrary
             int[,] cipherText2d = convert1DListTo2DArr(cipherText, 2, cipherText.Count/2);
             int[,] plainText2x2 = new int[2, 2];
             int[,] cipherText2x2 = new int[2, 2];
-           
-            //for (int i = 0; i < 2; i++)
-            //{
-            //    for (int j = 0; j < 2; j++)
-            //    {
-            //        plainText2x2[i, j] = plainText2d[i, j];
-            //        cipherText2x2[i, j] = cipherText2d[i, j];
-            //    }
-            //}
-            int inv=-1;
+            bool hasInv = false;
             for (int i = 0; i < plainText2d.Length/2; i++)
             {
                 plainText2x2[0, 0] = plainText2d[0, i];
@@ -135,39 +126,18 @@ namespace SecurityLibrary
                         cipherText2x2[1, 0] = cipherText2d[1, i];
                         cipherText2x2[0, 1] = cipherText2d[0, j];
                         cipherText2x2[1, 1] = cipherText2d[1, j];
-                        inv = getMultInvOfDet(det);
+                        hasInv = true;
                         break;
                     }
                 }
-                if (inv != -1) break;
+                if (hasInv) break;
             }
-            if (inv == -1)
-                throw new InvalidAnlysisException();
-            int a = cipherText2x2[0, 0] * plainText2x2[1, 1] - cipherText2x2[0, 1] * plainText2x2[1, 0];
-            int b = cipherText2x2[0, 1] * plainText2x2[0, 0] - cipherText2x2[0, 0] * plainText2x2[0, 1];
-            int c = cipherText2x2[1, 0] * plainText2x2[1, 1] - cipherText2x2[1, 1] * plainText2x2[1, 0];
-            int d = cipherText2x2[1, 1] * plainText2x2[0, 0] - cipherText2x2[1, 0] * plainText2x2[0, 1];
-
+            plainText2x2 = invert2x2Matrix(plainText2x2);
+            int[,] key2d=multiply2Matrices(plainText2x2, cipherText2x2, 2, 2);
             List<int> key = new List<int>();
-
-            a = mod(a, 26);
-            a = mod(a*inv, 26);
-            key.Add(a);
-
-            b = mod(b, 26);
-            b = mod(b * inv, 26);
-            key.Add(b);
-
-            c = mod(c, 26);
-            c = mod(c * inv, 26);
-            key.Add(c);
-
-            d = mod(d, 26);
-            d = mod(d * inv, 26);
-            key.Add(d);
-
-
-
+            for (int i = 0; i < 2; i++)
+                for (int j = 0; j < 2; j++)
+                    key.Add(key2d[i, j]);
             return key;
         }
 
@@ -228,7 +198,15 @@ namespace SecurityLibrary
 
         public List<int> Analyse3By3Key(List<int> plain3, List<int> cipher3)
         {
-            throw new NotImplementedException();
+            int[,] plainText2d = convert1DListTo2DArr(plain3, 3, plain3.Count / 3);
+            int[,] cipherText2d = convert1DListTo2DArr(cipher3, 3, cipher3.Count / 3);
+            plainText2d = invert3x3Matrix(plainText2d);
+            int[,] key2d = multiply2Matrices(plainText2d, cipherText2d, 3, 3);
+            List<int> key = new List<int>();
+            for (int i = 0; i < 3; i++)
+                for (int j = 0; j < 3; j++)
+                    key.Add(key2d[i, j]);
+            return key;
         }
 
         public string Analyse3By3Key(string plain3, string cipher3)
