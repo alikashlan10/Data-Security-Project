@@ -18,10 +18,13 @@ namespace SecurityLibrary
                 if (plainText[i] == cipherText[1])
                 {
                     key = i;
-                    if (plainText[2 * key] == cipherText[2])
-                    {
-                        return key;
-                    }
+                    for (int j = 2; j * key < plainText.Length; j++)
+                        if (plainText[j * key] != cipherText[j])
+                        {
+                            key = -1;
+                            break;
+                        }
+                    if (key != -1) return key;
                 }
             }
             return key;
