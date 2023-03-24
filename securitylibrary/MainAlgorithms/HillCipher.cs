@@ -107,21 +107,68 @@ namespace SecurityLibrary
         public List<int> Analyse(List<int> plainText, List<int> cipherText)
         {
             int[,] plainText2d = convert1DListTo2DArr(plainText, 2, plainText.Count/2);
-            int[,] cipherText2d = convert1DListTo2DArr(plainText, 2, cipherText.Count/2);
+            int[,] cipherText2d = convert1DListTo2DArr(cipherText, 2, cipherText.Count/2);
             int[,] plainText2x2 = new int[2, 2];
             int[,] cipherText2x2 = new int[2, 2];
-            for(int i = 0; i < 2; i++)
+           
+            //for (int i = 0; i < 2; i++)
+            //{
+            //    for (int j = 0; j < 2; j++)
+            //    {
+            //        plainText2x2[i, j] = plainText2d[i, j];
+            //        cipherText2x2[i, j] = cipherText2d[i, j];
+            //    }
+            //}
+            int inv=-1;
+            for (int i = 0; i < plainText2d.Length/2; i++)
             {
-                for(int j = 0; j < 2; j++)
+                plainText2x2[0, 0] = plainText2d[0, i];
+                plainText2x2[1, 0] = plainText2d[1, i];
+                for (int j = i+1; j < plainText2d.Length/2; j++)
                 {
-                    plainText2x2[i, j] = plainText2d[i, j+2];
-                    cipherText2x2[i, j] = cipherText2d[i, j+2];
+                    plainText2x2[0, 1] = plainText2d[0, j];
+                    plainText2x2[1, 1] = plainText2d[1, j];
+                    int det = plainText2x2[0, 0] * plainText2x2[1, 1] - plainText2x2[1, 0] * plainText2x2[0, 1];
+                    det = mod(det, 26);
+                    if (det % 2 == 1 && det != 13){
+                        cipherText2x2[0, 0] = cipherText2d[0, i];
+                        cipherText2x2[1, 0] = cipherText2d[1, i];
+                        cipherText2x2[0, 1] = cipherText2d[0, j];
+                        cipherText2x2[1, 1] = cipherText2d[1, j];
+                        inv = getMultInvOfDet(det);
+                        break;
+                    }
                 }
+                if (inv != -1) break;
             }
-            plainText2x2 = invert2x2Matrix(plainText2x2);
-            int[,] key = multiply2Matrices(cipherText2x2, plainText2x2, 2, 2);
+            if (inv == -1)
+                throw new InvalidAnlysisException();
+            int a = cipherText2x2[0, 0] * plainText2x2[1, 1] - cipherText2x2[0, 1] * plainText2x2[1, 0];
+            int b = cipherText2x2[0, 1] * plainText2x2[0, 0] - cipherText2x2[0, 0] * plainText2x2[0, 1];
+            int c = cipherText2x2[1, 0] * plainText2x2[1, 1] - cipherText2x2[1, 1] * plainText2x2[1, 0];
+            int d = cipherText2x2[1, 1] * plainText2x2[0, 0] - cipherText2x2[1, 0] * plainText2x2[0, 1];
 
-            return plainText;
+            List<int> key = new List<int>();
+
+            a = mod(a, 26);
+            a = mod(a*inv, 26);
+            key.Add(a);
+
+            b = mod(b, 26);
+            b = mod(b * inv, 26);
+            key.Add(b);
+
+            c = mod(c, 26);
+            c = mod(c * inv, 26);
+            key.Add(c);
+
+            d = mod(d, 26);
+            d = mod(d * inv, 26);
+            key.Add(d);
+
+
+
+            return key;
         }
 
         public string Analyse(string plainText, string cipherText)

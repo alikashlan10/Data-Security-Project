@@ -51,12 +51,35 @@ namespace SecurityLibrary
                     }
                 }
             }
-
             List<int> key = new List<int>(col);
+            //compare each column of the plainMatrix to each column of the cipherMatrix
+            for (int i = 0; i < col; i++)
+            {
+                bool found = true;
+                for (int k = 0; k < col; k++)
+                {
+                    found = true;
+                    for (int j = 0; j < row; j++)
+                    {
+                        if (plainMatrix[j, i] != cipherMatrix[j, k])
+                        {
+                            found = false;
+                            break;
+                        }
+                    }
+                    if (found)
+                    {
+                        key.Add(k + 1);
+                        break;
+                    }
+                }
+            }
+            while (key.Count <= 7)
+            {
+                key.Add(0);
+            }
             return key;
         }
-
-
         public string Decrypt(string cipherText, List<int> key)
         {
             cipherText = cipherText.ToLower();
@@ -67,7 +90,7 @@ namespace SecurityLibrary
             char[,] matrix = new char[row, col];
             int cnt = 0;
 
-            // Rearrange columns based on key
+            // arrange columns based on key
             for (int c = 1; c <= key.Count; c++)
             {
                 int pos = key.IndexOf(c);
@@ -79,7 +102,7 @@ namespace SecurityLibrary
                 }
             }
 
-            // Read out characters in correct order
+            // characters in correct order
             for (int rw = 0; rw < row; rw++)
             {
                 for (int cl = 0; cl < col; cl++)
