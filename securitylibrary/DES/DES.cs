@@ -141,16 +141,9 @@ namespace SecurityLibrary.DES
 
         public override string Encrypt(string plainText, string key)
         {
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            return Encrypted;
+
+
+            throw new NotImplementedException(); 
         }
     }
 }
