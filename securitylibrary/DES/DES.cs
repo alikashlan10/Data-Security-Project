@@ -131,6 +131,16 @@ namespace SecurityLibrary.DES
             binaryNumber = tmp;
             return binaryNumber;
         }
+        static string dePermutation(string binaryNumber, int[] P)
+        {
+            char[] arr = new char[binaryNumber.Length];
+            for (int i = 0; i < P.Length; i++)
+            {
+                arr[P[i] - 1] = binaryNumber[i];
+            }
+            string charsStr = new string(arr);
+            return charsStr;
+        }
         static string shiftLeft(string binaryNumber)
         {
             string shiftedBinaryNumber = binaryNumber.Substring(1, binaryNumber.Length - 1);
@@ -160,21 +170,21 @@ namespace SecurityLibrary.DES
                 int tmp = S[i][row, col];
 
                 string str = Convert.ToString(tmp, 2);//Convert Hex to Bin
-                str = binaryMissingZeros(str, 4);
+                str = missingZeros(str, 4);
 
                 xrComp += str;
             }
             xrComp = permutation(xrComp, P);
             return xrComp;
         }
-        static string binaryMissingZeros(string binaryNumber, int len)
+        static string missingZeros(string number, int len)
         {
             string tmp = "";
-            for (int i = 0; i < len - binaryNumber.Length; i++)
+            for (int i = 0; i < len - number.Length; i++)
             {
                 tmp += '0';
             }
-            tmp += binaryNumber;
+            tmp += number;
             return tmp;
         }
 
@@ -192,23 +202,19 @@ namespace SecurityLibrary.DES
         }
         static string HexConverted(string strBinary)
         {
-            string strHex = "0x";
-            strHex += Convert.ToInt64(strBinary, 2).ToString("X");
+            strBinary = Convert.ToInt64(strBinary, 2).ToString("X");
+            strBinary = missingZeros(strBinary, 16);
+            string strHex = "0x" + strBinary;
             return strHex;
         }
 
-        public override string Decrypt(string cipherText, string key)
-        {
-            throw new NotImplementedException();
-        }
 
-        public override string Encrypt(string plainText, string key)
+        static List<string> generateKeys(string key)
         {
-
             List<string> keys = new List<string>();
 
             key = Convert.ToString(Convert.ToInt64(key, 16), 2);//Convert Hex to Bin
-            key = binaryMissingZeros(key, 64);
+            key = missingZeros(key, 64);
             key = permutation(key, PC1);//key permutation 64 bit -> 56 bit
             //initialize C & D list for key of 16 round 
             List<string> C = new List<string>();
@@ -242,22 +248,54 @@ namespace SecurityLibrary.DES
 
             for (int i = 1; i <= 16; i++)
                 keys[i] = permutation(keys[i], PC2);
-            //Console.WriteLine(keys.Last());
+
+            return keys;
+        }
+
+        public override string Decrypt(string cipherText, string key)
+        {
+            List<string> keys = generateKeys(key);
+
+            cipherText = Convert.ToString(Convert.ToInt64(cipherText, 16), 2);//Convert Hex to Bin
+            cipherText = missingZeros(cipherText, 64);
+            //decrypt steps
+            //IPinv
+            cipherText = dePermutation(cipherText, IPinverse);
+            //swap
+            cipherText = cipherText.Substring(32, 32) + cipherText.Substring(0, 32); ;
+            //rounds
+            for (int i = 16; i >= 1; i--)
+            {
+                string left_n_Plus1 = cipherText.Substring(0, 32);
+                string right_n_Plus1 = cipherText.Substring(32, 32);
+                string right_n = left_n_Plus1;
+                string left_n = XOR(right_n_Plus1, fun(right_n, keys[i]));
+                cipherText = left_n + right_n;
+            }
+            //IP
+            cipherText = dePermutation(cipherText, IP);
+            return HexConverted(cipherText);
+        }
+
+        public override string Encrypt(string plainText, string key)
+        {
+
+            List<string> keys = generateKeys(key);
 
             plainText = Convert.ToString(Convert.ToInt64(plainText, 16), 2);//Convert Hex to Bin
-            plainText = binaryMissingZeros(plainText, 64);
+            plainText = missingZeros(plainText, 64);
             plainText = permutation(plainText, IP);//plain permutation
             // Console.WriteLine(plain);
-            string left2 = "", right2 = "";
+            string left_n_Plus1 = "", right_n_Plus1 = "";
             for (int i = 1; i <= 16; i++)
             {
-                string left1 = plainText.Substring(0, 32);
-                string right1 = plainText.Substring(32, 32);
-                left2 = right1;
-                right2 = XOR(left1, fun(right1, keys[i]));
-                plainText = left2 + right2;
+                string left_n = plainText.Substring(0, 32);
+                string right_n = plainText.Substring(32, 32);
+                left_n_Plus1 = right_n;
+                right_n_Plus1 = XOR(left_n, fun(right_n, keys[i]));
+                plainText = left_n_Plus1 + right_n_Plus1;
             }
-            plainText = right2 + left2;
+            plainText = right_n_Plus1 + left_n_Plus1;
             plainText = permutation(plainText, IPinverse);
 
             return HexConverted(plainText);
