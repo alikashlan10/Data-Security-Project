@@ -8,7 +8,6 @@ namespace SecurityLibrary.DES
     /// </summary>
     public class DES : CryptographicTechnique
     {
-        public static List<string> keys = new List<string>();
         public static int[] PC1 =
         {
               57, 49, 41, 33, 25, 17, 9,
@@ -140,13 +139,13 @@ namespace SecurityLibrary.DES
         }
 
 
-        static string fun(string right, int j)
+        static string fun(string right, string key)
         {
             string exp_right = "";
             for (int i = 0; i < 48; i++)
                 exp_right += right[Expansion[i] - 1];
             //return exp_right;
-            string xr = XOR(keys[j], exp_right); ;
+            string xr = XOR(key, exp_right); ;
             string xrComp = "";
             for (int i = 0; i < 8; i++)
             {
@@ -206,6 +205,7 @@ namespace SecurityLibrary.DES
         public override string Encrypt(string plainText, string key)
         {
 
+            List<string> keys = new List<string>();
 
             key = Convert.ToString(Convert.ToInt64(key, 16), 2);//Convert Hex to Bin
             key = binaryMissingZeros(key, 64);
@@ -254,7 +254,7 @@ namespace SecurityLibrary.DES
                 string left1 = plainText.Substring(0, 32);
                 string right1 = plainText.Substring(32, 32);
                 left2 = right1;
-                right2 = XOR(left1, fun(right1, i));
+                right2 = XOR(left1, fun(right1, keys[i]));
                 plainText = left2 + right2;
             }
             plainText = right2 + left2;
