@@ -37,7 +37,6 @@ namespace SecurityLibrary.AES
                 for (int j = 0; j < 4; j++)
                     k[j] = oldKey[(j + 1) % 4, 3];
                 //sBox
-                int x = 0;
                 for (int j = 0; j < 4; j++)
                 {
                     int sRow;
@@ -80,19 +79,20 @@ namespace SecurityLibrary.AES
             string[,] w = convertToHexMatrix(key);
             List<string[,]> keys = new List<string[,]>();
             generateKeys(w, keys);
+            //output inv
             s = AddRoundKey(s, keys[10]);
-
-            for (int i = 9; i <= 1; i++)
-            {
-                s = invShiftRow(s);
-                s = invSubByte(s);
-                s = mixColumn(s);//inv
-                s = AddRoundKey(s, keys[i]);
-            }
+            //round 10 inv
             s = invShiftRow(s);
             s = invSubByte(s);
-            s = AddRoundKey(s, keys[0]);
+            s = AddRoundKey(s, keys[9]);
 
+            for (int i = 8; i >= 0; i--)
+            {
+                s = invMixColumn(s);//inv
+                s = invShiftRow(s);
+                s = invSubByte(s);
+                s = AddRoundKey(s, keys[i]);
+            }
             string plainText = convertToHexString(s);
             return plainText;
         }
@@ -342,7 +342,68 @@ namespace SecurityLibrary.AES
             return s_dash;
         }
 
+        string[,] invMixColumn(string[,] s)
+        {
+            string[,] s_dash = new string[4, 4];
+            string[,] MInv = new string[4, 4] {
+                {"0e", "0b", "0d", "09"},
+                {"09", "0e", "0b", "0d"},
+                {"0d", "09", "0e", "0b"},
+                {"0b", "0d", "09", "0e"}
+                };
 
+            for (int row = 0; row < 4; row++)
+                for (int col = 0; col < 4; col++)
+                    s[row, col] = ConvertHextoBin(s[row, col]);
+
+
+            for (int i = 0; i < 4; i++)
+            {
+                for (int k = 0; k < 4; k++)
+                {
+                    s_dash[i, k] = "00000000";
+                    for (int j = 0; j < 4; j++)
+                    {
+                        string tmp = s[j, k];
+                        if (MInv[i, j] != "01")
+                        {
+                            tmp = ConvertHextoBin(MInv[i, j]);
+                            tmp = multiplyGF(tmp, s[j, k]);
+                        }
+                        s_dash[i, k] = XOR(s_dash[i, k], tmp);
+                    }
+                }
+            }
+
+            for (int row = 0; row < 4; row++)
+            {
+                for (int col = 0; col < 4; col++)
+                {
+                    s_dash[row, col] = HexConverted(s_dash[row, col]);
+                }
+            }
+
+            return s_dash;
+        }
+        string multiplyGF(string a, string b)
+        {
+            string x1B = "00011011";
+            string result = "00000000";
+            for (int i = 0; i < 8; i++)
+            {
+                if (b[7 - i] == '1')
+                {
+                    result = XOR(result, a);
+                }
+                bool carry = (a[0] == '1');
+                a = shiftLeft(a);
+                if (carry)
+                {
+                    a = XOR(a, x1B);
+                }
+            }
+            return result;
+        }
         static string shiftLeft(string binaryNumber)
         {
             string shiftedBinaryNumber = binaryNumber.Substring(1, binaryNumber.Length - 1);
