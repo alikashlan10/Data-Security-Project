@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SecurityLibrary.DES
 {
@@ -13,12 +10,20 @@ namespace SecurityLibrary.DES
     {
         public string Decrypt(string cipherText, List<string> key)
         {
-            throw new NotImplementedException();
+            DES algorithm = new DES();
+            cipherText = algorithm.Decrypt(cipherText, key[0]);
+            cipherText = algorithm.Encrypt(cipherText, key[1]);
+            cipherText = algorithm.Decrypt(cipherText, key[0]);
+            return cipherText;
         }
 
         public string Encrypt(string plainText, List<string> key)
         {
-            throw new NotImplementedException();
+            DES algorithm = new DES();
+            plainText = algorithm.Encrypt(plainText, key[0]);
+            plainText = algorithm.Decrypt(plainText, key[1]);
+            plainText = algorithm.Encrypt(plainText, key[0]);
+            return plainText;
         }
 
         public List<string> Analyse(string plainText, string cipherText)

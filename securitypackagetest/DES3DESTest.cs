@@ -1,11 +1,11 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SecurityLibrary.DES;
+using System;
 using System.Collections.Generic;
 
 namespace SecurityPackageTest
 {
-   
+
     [TestClass]
     public class DES3DESTest
     {
@@ -19,7 +19,7 @@ namespace SecurityPackageTest
 
         string mainPlainTriple = "0x0123456789ABCDEF";
         string mainCipherTriple = "0x85E813540F0AB405";
-        List<string> mainKeyTriple =  new List<string>() {"0x133457799BBCDFF1", "0x133457799BBCDFF1" };
+        List<string> mainKeyTriple = new List<string>() { "0x133457799BBCDFF1", "0x133457799BBCDFF1" };
 
 
         string newPlain = "0x6D6573736167652E";
