@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SecurityLibrary.RSA
 {
@@ -10,6 +6,7 @@ namespace SecurityLibrary.RSA
     {
         public int Encrypt(int p, int q, int M, int e)
         {
+
             throw new NotImplementedException();
         }
 
